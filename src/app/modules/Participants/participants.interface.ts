@@ -1,0 +1,1 @@
+// interface for Participants module
