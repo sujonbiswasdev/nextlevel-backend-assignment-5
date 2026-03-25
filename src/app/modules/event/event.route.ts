@@ -7,9 +7,9 @@ import { EventController } from "./event.controller"
 import { CreateEventSchema, UpdateEventSchema } from "./event.validation"
 
 const router=Router()
-router.post("/",auth([Role.ADMIN,Role.USER]),validateRequest(CreateEventSchema), EventController.createEvent)
-router.get("/", EventController.getAllEvents);
-router.get("/:id", EventController.getSingleEvent);
-router.put("/:id",auth([Role.ADMIN,Role.USER]),validateRequest(UpdateEventSchema), EventController.updateEvent);
-router.delete("/:id",auth([Role.ADMIN,Role.USER]), EventController.DeletedEvent);
+router.post("/event",auth([Role.ADMIN,Role.USER]),validateRequest(CreateEventSchema), EventController.createEvent)
+router.get("/events", EventController.getAllEvents);
+router.get("/event/:id", EventController.getSingleEvent);
+router.put("/event/:id",auth([Role.ADMIN,Role.USER]),validateRequest(UpdateEventSchema), EventController.updateEvent);
+router.delete("/event/:id",auth([Role.ADMIN,Role.USER]), EventController.DeletedEvent);
 export const EventRouters=router

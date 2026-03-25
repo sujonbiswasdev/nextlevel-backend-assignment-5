@@ -7,10 +7,10 @@ import { createInvitationSchema, updateInvitationSchema } from "./invitations.va
 import { InvitationController } from "./invitations.controller"
 
 const router=Router()
-router.post("/event/:id",auth([Role.ADMIN,Role.USER]),validateRequest(createInvitationSchema),InvitationController.CreateInvitation)
-router.get("/", InvitationController.GetAllInvitationsController);
-router.get("/user/:id", InvitationController.GetUserInvitationsController);
-router.get("/:id", InvitationController.GetSingleInvitationController);
-router.put("/:id",auth([Role.ADMIN,Role.USER]),validateRequest(updateInvitationSchema), InvitationController.updateInvitation);
-router.delete("/:id",auth([Role.ADMIN,Role.USER]),InvitationController.deleteInvitation);
+router.post("/invitation/event/:id",auth([Role.ADMIN,Role.USER]),validateRequest(createInvitationSchema),InvitationController.CreateInvitation)
+router.get("/invitations", InvitationController.GetAllInvitationsController);
+router.get("/invitation/user/:id", InvitationController.GetUserInvitationsController);
+router.get("/invitation/:id", InvitationController.GetSingleInvitationController);
+router.put("/invitation/:id",auth([Role.ADMIN,Role.USER]),validateRequest(updateInvitationSchema), InvitationController.updateInvitation);
+router.delete("/invitation/:id",auth([Role.ADMIN,Role.USER]),InvitationController.deleteInvitation);
 export const InvitationsRouters=router

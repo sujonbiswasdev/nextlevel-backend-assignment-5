@@ -205,6 +205,7 @@ export const ReviewScalarFieldEnum = {
   eventId: 'eventId',
   rating: 'rating',
   comment: 'comment',
+  parentId: 'parentId',
   createdAt: 'createdAt'
 } as const
 
