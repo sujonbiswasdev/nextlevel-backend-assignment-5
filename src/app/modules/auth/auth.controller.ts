@@ -47,8 +47,24 @@ const loginUser = catchAsync(
     }
 )
 
+const getMe = catchAsync(
+    async (req: Request, res: Response) => {
+        const userId = req.user.userId;
+        console.log(userId,'useriddata')
+
+        const data = await AuthService.getMe(req.user);
+        sendResponse(res, {
+            httpStatusCode: status.OK,
+            success: true,
+            message: "User data retrieved successfully",
+            data:data
+        })
+    }
+)
+
 export const AuthController = {
     UserRegister,
-    loginUser
+    loginUser,
+    getMe
     
 };
