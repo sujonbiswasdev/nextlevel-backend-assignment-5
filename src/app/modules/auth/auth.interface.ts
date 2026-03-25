@@ -9,3 +9,8 @@ export interface ICreateUser {
   role?: "ADMIN" | "USER";
   status?: "ACTIVE" | "INACTIVE" | "BANNED" | "PENDING";
 }
+
+export interface ILoginUser{
+    email: string;
+    password: string;
+}
