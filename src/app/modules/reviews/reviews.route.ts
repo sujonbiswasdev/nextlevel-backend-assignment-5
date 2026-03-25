@@ -11,4 +11,5 @@ const router=Router()
 router.post("/event/:id/review",validateRequest(createReviewsData),auth([Role.USER]),ReviewsControllers.CreateReviews)
 
 router.put("/review/:reviewid", auth([Role.USER]),validateRequest(updateReviewsData), ReviewsControllers.updateReview)
+router.delete("/review/:reviewid", auth([Role.ADMIN,Role.USER]), ReviewsControllers.deleteReview)
 export const ReviewsRouters=router
