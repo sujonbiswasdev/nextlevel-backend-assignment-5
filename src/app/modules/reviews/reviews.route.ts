@@ -5,8 +5,10 @@ import { validateRequest } from "../../middleware/validateRequest"
 import { Role } from "../../../generated/prisma/enums"
 import auth from "../../middleware/Auth"
 import { ReviewsControllers } from "./reviews.controller"
-import { createReviewsData } from "./reviews.validation"
+import { createReviewsData, updateReviewsData } from "./reviews.validation"
 
 const router=Router()
 router.post("/event/:id/review",validateRequest(createReviewsData),auth([Role.USER]),ReviewsControllers.CreateReviews)
+
+router.put("/review/:reviewid", auth([Role.USER]),validateRequest(updateReviewsData), ReviewsControllers.updateReview)
 export const ReviewsRouters=router

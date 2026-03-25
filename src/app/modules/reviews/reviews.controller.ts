@@ -19,6 +19,22 @@ const CreateReviews =catchAsync(async (req: Request, res: Response) => {
             data:result
         })
 })
+
+const updateReview = catchAsync(async (req: Request, res: Response) => {
+      const user = req.user;
+       if (!user) {
+           return res.status(401).json({ success: false, message: "you are unauthorized" })
+        }
+        const { reviewid } = req.params;
+        const result = await ReviewsServices.updateReview(reviewid as string, req.body, user.userId as string)
+            sendResponse(res,{
+                httpStatusCode:status.OK,
+                success:true,
+                message:"review update successfully",
+                data:result
+            })
+} )
 export const ReviewsControllers={
-    CreateReviews
+    CreateReviews,
+    updateReview
 }

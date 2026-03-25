@@ -1,6 +1,6 @@
 import AppError from "../../errorHelper/AppError";
 import { prisma } from "../../lib/prisma";
-import { ICreatereviewData } from "./reviews.interface";
+import { ICreatereviewData, IUpdatereviewData } from "./reviews.interface";
 
 // service for reviews module
 const CreateReviews = async (userId: string, eventId: string, data: ICreatereviewData) => {
@@ -29,6 +29,39 @@ const CreateReviews = async (userId: string, eventId: string, data: ICreaterevie
 
 }
 
+
+const updateReview = async (reviewId: string, data: IUpdatereviewData, userid: string) => {
+  
+    const review = await prisma.review.findFirst({
+        where: {
+            id: reviewId,
+            userId: userid
+        },
+        select: {
+            id: true
+        }
+    })
+    if (!review) {
+        throw new AppError(404,"your review not found,please update your own review")
+    }
+
+    const result = await prisma.review.update({
+        where: {
+            id: reviewId,
+            userId: userid
+        },
+        data: {
+            ...data
+        }
+    })
+    return {
+        success: true,
+        message:`your review update successfully`,
+        result
+    }
+}
+
 export const ReviewsServices={
-    CreateReviews
+    CreateReviews,
+    updateReview
 }
