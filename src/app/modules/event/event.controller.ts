@@ -3,6 +3,7 @@ import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 import { EventServices } from "./event.service";
+import paginationSortingHelper from "../../helpers/paginationHelping";
 
 const createEvent = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
@@ -17,7 +18,8 @@ const createEvent = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllEvents = catchAsync(async (req: Request, res: Response) => {
-  const events = await EventServices.getAllEvents();
+  const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(req.query)
+  const events = await EventServices.getAllEvents(req.query,page, limit, skip, sortBy, sortOrder);
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,

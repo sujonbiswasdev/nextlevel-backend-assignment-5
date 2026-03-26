@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EventType } from "../../../generated/prisma/enums";
 const timeRegex = /^(0[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/;
 
-export const EventCategoryEnum = z.enum([
+export const EventCategoryEnum = [
   "BIRTHDAY",
   "WEDDING",
   "ANNIVERSARY",
@@ -38,15 +38,15 @@ export const EventCategoryEnum = z.enum([
   "GAMING",
   "FOOD_EVENT",
   "TRAVEL_MEETUP",
-]);
+];
 
-export const EventStatusEnum = z.enum([
+export const EventStatusEnum =[
   "DRAFT",
   "UPCOMING",
   "ONGOING",
   "COMPLETED",
   "CANCELLED",
-]).default("UPCOMING");
+];
 
 export const CreateEventSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),

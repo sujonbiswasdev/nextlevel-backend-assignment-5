@@ -2,11 +2,25 @@ import status from "http-status";
 import AppError from "../../errorHelper/AppError";
 import { IRequestUser } from "../../interface/requestUser.interface";
 import { prisma } from "../../lib/prisma";
-import { ICreateEvent, IUpdateEventInput } from "./event.interface";
+import {
+  ICreateEvent,
+  IEventQuery,
+  IUpdateEventInput,
+} from "./event.interface";
+import { EventWhereInput } from "../../../generated/prisma/models";
 
 const createEvent = async (user: IRequestUser, payload: ICreateEvent) => {
-  const { description, date, time, title, visibility, venue, fee, categories,image } =
-    payload;
+  const {
+    description,
+    date,
+    time,
+    title,
+    visibility,
+    venue,
+    fee,
+    categories,
+    image,
+  } = payload;
   const event = await prisma.event.create({
     data: {
       title,
@@ -25,7 +39,14 @@ const createEvent = async (user: IRequestUser, payload: ICreateEvent) => {
   return event;
 };
 
-const getAllEvents = async () => {
+const getAllEvents = async (
+  data: IEventQuery,
+  page?: number,
+  limit?: number | undefined,
+  skip?: number,
+  sortBy?: string | undefined,
+  sortOrder?: string | undefined,
+) => {
   const statuses = [
     "DRAFT",
     "UPCOMING",
@@ -33,18 +54,80 @@ const getAllEvents = async () => {
     "COMPLETED",
     "CANCELLED",
   ] as const;
+  const andConditions: EventWhereInput[] | EventWhereInput = [];
+
+  if (data) {
+    const orConditions: any[] = [];
+    if (data.title) {
+      orConditions.push({
+        meals_name: {
+          contains: data.title,
+          mode: "insensitive",
+        },
+      });
+    }
+    if (data.description) {
+      orConditions.push({
+        description: {
+          contains: data.description,
+          mode: "insensitive",
+        },
+      });
+    }
+    if (data.categories) {
+      orConditions.push({
+        category_name: {
+          contains: data.categories,
+          mode: "insensitive",
+        },
+      });
+    }
+    if (orConditions.length > 0) {
+      andConditions.push({ OR: orConditions });
+    }
+  }
+
+  if (data.fee) {
+    andConditions.push({
+      fee: {
+        gte: 1,
+        lte: Number(data.fee),
+      },
+    });
+  }
+
+  if (data.visibility) {
+    andConditions.push({
+      visibility: data.visibility,
+    });
+  }
+
+  if (data.status) {
+    andConditions.push({
+      status: data.status,
+    });
+  }
+
+  if (data.date) {
+    andConditions.push({
+      date: data.date,
+    });
+  }
 
   const result: any = {};
-
   for (const status of statuses) {
     const events = await prisma.event.findMany({
-      where: { status },
+      take: limit,
+      skip,
+      where: { status, AND: andConditions },
       include: {
         reviews: {
           where: { rating: { gt: 0 } },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        [sortBy!]:sortOrder
+      },
     });
 
     result[status] = events.map((event) => {

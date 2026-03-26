@@ -24,3 +24,5 @@ export interface IUpdateEventInput {
   visibility?: "PUBLIC" | "PRIVATE" ;
   fee?: number;
 }
+
+export type IEventQuery = Partial<IUpdateEventInput>;

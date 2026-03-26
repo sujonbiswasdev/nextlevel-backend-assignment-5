@@ -7,7 +7,7 @@ dotenv.config();
 interface EnvConfig {
   NODE_ENV?: string;
   PORT: string;
-  FRONTEND_URL:string;
+  FRONTEND_URL: string;
   ACCESS_TOKEN_SECRET?: string;
   REFRESH_TOKEN_SECRET?: string;
   ACCESS_TOKEN_EXPIRES_IN?: string;
@@ -20,10 +20,17 @@ interface EnvConfig {
     SMTP_PORT: string;
     SMTP_FROM: string;
   };
-      STRIPE:{
-        STRIPE_SECRET_KEY: string;
-        STRIPE_WEBHOOK_SECRET: string;
-    },
+  STRIPE: {
+    STRIPE_SECRET_KEY: string;
+    STRIPE_WEBHOOK_SECRET: string;
+  };
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  CLOUDINARY: {
+    CLOUDINARY_CLOUD_NAME: string;
+    CLOUDINARY_API_KEY: string;
+    CLOUDINARY_API_SECRET: string;
+  };
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -35,9 +42,14 @@ const loadEnvVariables = (): EnvConfig => {
     "ACCESS_TOKEN_EXPIRES_IN",
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
-     'STRIPE_SECRET_KEY',
-      'STRIPE_WEBHOOK_SECRET',
-      'FRONTEND_URL'
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "FRONTEND_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
   ];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
@@ -63,11 +75,18 @@ const loadEnvVariables = (): EnvConfig => {
       SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
       SMTP_FROM: process.env.EMAIL_SENDER_SMTP_FROM as string,
     },
-     STRIPE: {
-            STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
-            STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
-        },
-      FRONTEND_URL:process.env.FRONTEND_URL as string
+    STRIPE: {
+      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
+    },
+    FRONTEND_URL: process.env.FRONTEND_URL as string,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+    CLOUDINARY: {
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
+      CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+    },
   };
 };
 

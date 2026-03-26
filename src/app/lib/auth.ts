@@ -1,10 +1,11 @@
+import { envVars } from './../config/env';
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { Role, UserStatus } from "../../generated/prisma/enums";
 import { bearer, emailOTP } from "better-auth/plugins";
-import { envVars } from "../config/env";
 import { sendEmail } from "../utils/email";
+import { Stats } from 'node:fs';
 export const auth = betterAuth({
   baseURL: envVars.BETTER_AUTH_URL,
   secret: envVars.BETTER_AUTH_SECRET,
@@ -17,6 +18,12 @@ export const auth = betterAuth({
         type: "string",
         required: true,
         defaultValue: Role.USER,
+      },
+
+      emailVerified: {
+        type: "boolean",
+        returned: true,
+        defaultValue: false,
       },
 
       status: {
@@ -63,6 +70,16 @@ export const auth = betterAuth({
                 email,
               },
             });
+            if (user?.role === "ADMIN") {
+              await prisma.user.update({
+                where: {
+                  email,
+                },
+                data: {
+                  emailVerified: true,
+                },
+              });
+            }
 
             if (user && !user.emailVerified) {
               sendEmail({
@@ -100,4 +117,44 @@ export const auth = betterAuth({
       otpLength: 6,
     }),
   ],
+  socialProviders: {
+        google: { 
+            clientId: envVars.GOOGLE_CLIENT_ID as string, 
+            clientSecret: envVars.GOOGLE_CLIENT_SECRET as string, 
+            mapProfileToUser:()=>{
+              return{
+                role:Role.USER,
+                status:UserStatus.ACTIVE,
+                emailVerified:true,
+                isDeleted:false,
+                deletedAt:null
+              }
+            }
+        }, 
+    },
+    advanced: {
+        // disableCSRFCheck: true,
+        useSecureCookies : false,
+        cookies:{
+            state:{
+                attributes:{
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                    path: "/",
+                }
+            },
+            sessionToken:{
+                attributes:{
+                    sameSite: "none",
+                    secure: true,
+                    httpOnly: true,
+                    path: "/",
+                }
+            }
+        }},
+
+      redirectURLs:{
+        signin:`${envVars.BETTER_AUTH_URL}`
+    },
 });

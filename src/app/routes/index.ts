@@ -6,7 +6,7 @@ import { ParticipantRoutes } from "../modules/Participants/participants.route";
 import { ReviewsRouters } from "../modules/reviews/reviews.route";
 
 const router = Router()
-router.use("/auth", AuthRouters);
+router.use("/v1/auth", AuthRouters);
 // event
 router.use("/v1", EventRouters);
 
