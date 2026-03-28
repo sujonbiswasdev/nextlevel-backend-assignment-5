@@ -7,6 +7,7 @@ import { AuthService } from "./auth.service";
 import { CookieUtils } from "../../utils/cookie";
 import { envVars } from "../../config/env";
 import { auth } from "../../lib/auth";
+import { CLIENT_RENEG_LIMIT } from "node:tls";
 
 const UserRegister = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -51,6 +52,8 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
     data: data,
   });
 });
+
+
 
 const changePassword = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -132,15 +135,22 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const sendOtp = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  await AuthService.sendOtp(email);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "OTP sent to email successfully",
+  });
+});
+
+
 
 const googleLogin = catchAsync((req: Request, res: Response) => {
-    const redirectPath = req.query.redirect || "/dashboard";
-    console.log(redirectPath,'data')
 
-    const encodedRedirectPath = encodeURIComponent(redirectPath as string);
-    console.log(encodedRedirectPath,'datas')
-
-    const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodedRedirectPath}`;
+    const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`;
     res.render("googleRedirect", {
         callbackURL : callbackURL,
         betterAuthUrl : envVars.BETTER_AUTH_URL,
@@ -151,6 +161,7 @@ const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
     const redirectPath = req.query.redirect as string || "/dashboard";
 
     const sessionToken = req.cookies["better-auth.session_token"];
+    console.log(sessionToken,'sessionToken')    
 
     if(!sessionToken){
         return res.redirect(`${envVars.FRONTEND_URL}/login?error=oauth_failed`);
@@ -201,5 +212,6 @@ export const AuthController = {
   verifyEmail,
   googleLogin,
   googleLoginSuccess,
-  handleOAuthError
+  handleOAuthError,
+  sendOtp
 };

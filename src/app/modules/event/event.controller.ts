@@ -6,8 +6,12 @@ import { EventServices } from "./event.service";
 import paginationSortingHelper from "../../helpers/paginationHelping";
 
 const createEvent = catchAsync(async (req: Request, res: Response) => {
+        const payload = {
+            ...req.body,
+            image:req.file?.path || req.body.image
+        };
   const user = req.user;
-  const result = await EventServices.createEvent(user, req.body);
+  const result = await EventServices.createEvent(user, payload);
 
   sendResponse(res, {
     httpStatusCode: status.CREATED,
@@ -18,6 +22,7 @@ const createEvent = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllEvents = catchAsync(async (req: Request, res: Response) => {
+
   const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(req.query)
   const events = await EventServices.getAllEvents(req.query,page, limit, skip, sortBy, sortOrder);
   sendResponse(res, {

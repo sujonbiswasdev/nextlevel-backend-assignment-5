@@ -6,14 +6,19 @@ import path from "path";
 import { envVars } from "../config/env";
 import AppError from "../errorHelper/AppError";
 
+const smtpPort = Number(envVars.EMAIL_SENDER.SMTP_PORT);
 const transporter = nodemailer.createTransport({
     host : envVars.EMAIL_SENDER.SMTP_HOST,
-    secure: true,
+    port: smtpPort,
+    // Port 465 expects implicit TLS (secure=true). Port 587/25 typically uses STARTTLS (secure=false).
+    secure: smtpPort === 465,
     auth: {
         user: envVars.EMAIL_SENDER.SMTP_USER,
         pass: envVars.EMAIL_SENDER.SMTP_PASS
     },
-    port: Number(envVars.EMAIL_SENDER.SMTP_PORT)
+    connectionTimeout: 15_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 30_000,
 })
 
 interface SendEmailOptions {
@@ -48,7 +53,12 @@ export const sendEmail = async ({subject, templateData, templateName, to, attach
 
         console.log(`Email sent to ${to} : ${info.messageId}`);
     } catch (error : any) {
-        console.log("Email Sending Error", error.message);
+        console.log("Email Sending Error", {
+            message: error?.message,
+            code: error?.code,
+            command: error?.command,
+            responseCode: error?.responseCode,
+        });
         throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to send email");
     }
 }

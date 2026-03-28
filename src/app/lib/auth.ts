@@ -7,11 +7,12 @@ import { bearer, emailOTP } from "better-auth/plugins";
 import { sendEmail } from "../utils/email";
 import { Stats } from 'node:fs';
 export const auth = betterAuth({
-  baseURL: envVars.BETTER_AUTH_URL,
+  baseURL: `${envVars.BETTER_AUTH_URL}/api/auth`,
   secret: envVars.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  appName: "Planora",
   user: {
     additionalFields: {
       role: {
@@ -115,6 +116,7 @@ export const auth = betterAuth({
       },
       expiresIn: 4 * 60, // 4 minutes in seconds
       otpLength: 6,
+      resendStrategy: "rotate"
     }),
   ],
   socialProviders: {
@@ -131,6 +133,10 @@ export const auth = betterAuth({
               }
             }
         }, 
+        github: { 
+          clientId: process.env.GITHUB_CLIENT_ID as string, 
+          clientSecret: process.env.GITHUB_CLIENT_SECRET as string, 
+      }, 
     },
     advanced: {
         // disableCSRFCheck: true,

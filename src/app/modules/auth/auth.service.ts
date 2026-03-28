@@ -6,25 +6,25 @@ import { prisma } from "../../lib/prisma";
 import { tokenUtils } from "../../utils/token";
 import {
   IChangePasswordPayload,
-  ICreateUser,
   ILoginUser,
+  UserCreateInput,
 } from "./auth.interface";
 import status from "http-status";
-const UserRegister = async (payload: ICreateUser) => {
-  const { name, email, password, role, status } = payload;
-  const userExist=await prisma.user.findUnique({
-    where:{email:email}}
-  )
-  if(userExist){
-    throw new AppError(409,'user already exist,please try another email')
+const UserRegister = async (payload: UserCreateInput) => {
+  const { name, email, password, phone, image } = payload;
+  const userExist = await prisma.user.findUnique({
+    where: { email: email },
+  });
+  if (userExist) {
+    throw new AppError(409, "user already exist,please try another email");
   }
   const data = await auth.api.signUpEmail({
     body: {
       name,
       email,
       password,
-      role,
-      status,
+      phone,
+      image,
     },
   });
   if (!data.user) {
@@ -108,22 +108,22 @@ const getMe = async (user: IRequestUser) => {
       id: user.userId,
     },
     include: {
-      events:{
-        include:{
-          reviews:true
-        }
-      }
+      events: {
+        include: {
+          reviews: true,
+        },
+      },
     },
   });
   if (!isUserExists) {
     throw new AppError(status.NOT_FOUND, "User not found");
   }
 
-    const userid = isUserExists.id;
+  const userid = isUserExists.id;
   const ratings = await prisma.review.groupBy({
     by: ["eventId"],
     where: {
-      userId:userid,
+      userId: userid,
       rating: {
         gt: 0,
       },
@@ -143,10 +143,10 @@ const getMe = async (user: IRequestUser) => {
     0,
   );
   const averageRating = totalReview > 0 ? totalRating / totalReview : 0;
-    return {
-      ...isUserExists,
-      totalReview: totalReview || 0,
-      averageRating: Number(averageRating.toFixed(1)) || 0,
+  return {
+    ...isUserExists,
+    totalReview: totalReview || 0,
+    averageRating: Number(averageRating.toFixed(1)) || 0,
   };
 };
 
@@ -176,6 +176,9 @@ const changePassword = async (
       Authorization: `Bearer ${sessionToken}`,
     }),
   });
+  if(!result){
+    throw new AppError(400,'user change password failed')
+  }
 
   const accessToken = tokenUtils.getAccessToken({
     userId: session.user.id,
@@ -245,6 +248,7 @@ const resetPassword = async (
   otp: string,
   newPassword: string,
 ) => {
+  console.log(email,otp,newPassword,'passwrd')
   const isUserExist = await prisma.user.findUnique({
     where: {
       email,
@@ -297,42 +301,70 @@ const verifyEmail = async (email: string, otp: string) => {
   }
 };
 
+const sendOtp = async (email: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
 
-const googleLoginSuccess = async (session : Record<string, any>) =>{
-    const isPatientExists = await prisma.user.findUnique({
-        where : {
-            id : session.user.id,
-        }
-    })
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
 
-    if(!isPatientExists){
-        await prisma.user.create({
-            data : {
-                id : session.user.id,
-                name : session.user.name,
-                email : session.user.email,
-            }
-        
-        })
-    }
+  if (user.isDeleted || user.status === UserStatus.DELETED) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+  if (user.emailVerified) {
+    throw new AppError(status.BAD_REQUEST, "Email already verified");
+  }
 
-    const accessToken = tokenUtils.getAccessToken({
-        userId: session.user.id,
-        role: session.user.role,
+  // Send OTP using external auth API
+  const result =await auth.api.sendVerificationOTP({
+    body: {
+      email: email, // required
+      type: "email-verification", // required
+  }, 
+  });
+
+  return result;
+};
+
+
+const googleLoginSuccess = async (session: Record<string, any>) => {
+  const isPatientExists = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+  });
+
+  if (!isPatientExists) {
+    await prisma.user.create({
+      data: {
+        id: session.user.id,
         name: session.user.name,
+        email: session.user.email,
+      },
     });
+  }
 
-    const refreshToken = tokenUtils.getRefreshToken({
-        userId: session.user.id,
-        role: session.user.role,
-        name: session.user.name,
-    });
+  const accessToken = tokenUtils.getAccessToken({
+    userId: session.user.id,
+    role: session.user.role,
+    name: session.user.name,
+  });
 
-    return {
-        accessToken,
-        refreshToken,
-    }
-}
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: session.user.id,
+    role: session.user.role,
+    name: session.user.name,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
 
 export const AuthService = {
   UserRegister,
@@ -343,5 +375,6 @@ export const AuthService = {
   forgetPassword,
   resetPassword,
   verifyEmail,
-  googleLoginSuccess
+  googleLoginSuccess,
+  sendOtp
 };

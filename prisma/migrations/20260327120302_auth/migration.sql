@@ -17,7 +17,7 @@ CREATE TYPE "EventCategory" AS ENUM ('BIRTHDAY', 'WEDDING', 'ANNIVERSARY', 'REUN
 CREATE TYPE "ParticipantStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'BANNED');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PAID', 'UNPAID');
+CREATE TYPE "PaymentStatus" AS ENUM ('PAID', 'UNPAID', 'FREE');
 
 -- CreateEnum
 CREATE TYPE "InvitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED');
@@ -138,9 +138,11 @@ CREATE TABLE "Payment" (
     "userId" TEXT NOT NULL,
     "eventId" TEXT NOT NULL,
     "stripeEventId" TEXT,
-    "transactionId" TEXT,
+    "transactionId" UUID,
+    "paymentGatewayData" JSONB,
     "amount" DOUBLE PRECISION NOT NULL,
-    "status" "PaymentStatus" NOT NULL,
+    "status" "PaymentStatus" NOT NULL DEFAULT 'UNPAID',
+    "participantId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
@@ -178,6 +180,12 @@ CREATE INDEX "verification_identifier_idx" ON "verification"("identifier");
 -- CreateIndex
 CREATE UNIQUE INDEX "Payment_stripeEventId_key" ON "Payment"("stripeEventId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Payment_transactionId_key" ON "Payment"("transactionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payment_participantId_key" ON "Payment"("participantId");
+
 -- AddForeignKey
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -207,6 +215,9 @@ ALTER TABLE "Payment" ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_participantId_fkey" FOREIGN KEY ("participantId") REFERENCES "Participant"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

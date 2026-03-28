@@ -1,18 +1,12 @@
+import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { cloudinaryUpload } from "./cloudinary.config";
-import multer from "multer";
-import status from "http-status";
-import AppError from "../errorHelper/AppError";
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinaryUpload,
   params: async (req, file) => {
-    if (!file) {
-      throw new AppError(status.BAD_REQUEST, "file upload failed");
-    }
-
     const originalName = file.originalname;
     const extension = originalName.split(".").pop()?.toLocaleLowerCase();
-
     const fileNameWithoutExtension = originalName
       .split(".")
       .slice(0, -1)
@@ -30,13 +24,24 @@ const storage = new CloudinaryStorage({
       fileNameWithoutExtension;
 
     const folder = extension === "pdf" ? "pdfs" : "images";
-
-    return {
-      public_id: `planora/${folder}/${uniqueName}`,
+    console.log({
       folder: `planora/${folder}`,
+      public_id:uniqueName,
+      resource_type: "auto",
+    })
+    return {
+      folder: `planora/${folder}`,
+      public_id: uniqueName,
       resource_type: "auto",
     };
+
+    
   },
+
+
+
+
+
 });
 
-const uploadParser = multer({ storage: storage });
+export const multerUpload = multer({storage});

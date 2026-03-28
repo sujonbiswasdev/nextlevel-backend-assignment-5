@@ -13,6 +13,8 @@ interface EnvConfig {
   ACCESS_TOKEN_EXPIRES_IN?: string;
   BETTER_AUTH_SECRET?: string;
   BETTER_AUTH_URL?: string;
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
   EMAIL_SENDER: {
     SMTP_USER: string;
     SMTP_PASS: string;
@@ -50,6 +52,8 @@ const loadEnvVariables = (): EnvConfig => {
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
   ];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
@@ -85,8 +89,10 @@ const loadEnvVariables = (): EnvConfig => {
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
       CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string
     },
+    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID as string,
+    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET as string,
   };
 };
 

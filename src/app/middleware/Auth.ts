@@ -14,7 +14,6 @@ const auth = (roles: string[]) => {
         req,
         "better-auth.session_token",
       );
-      console.log(sessionToken,'ses')
       if (!sessionToken) {
         throw new AppError(
           status.UNAUTHORIZED,

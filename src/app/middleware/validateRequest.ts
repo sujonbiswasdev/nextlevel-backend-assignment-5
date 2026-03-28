@@ -1,17 +1,20 @@
 import { NextFunction, Request, Response } from "express";
 import z from "zod";
+
 export const validateRequest = (zodSchema: z.ZodObject) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        const parsedResult = zodSchema.safeParse(req.body)
-        if(req.body.data){
-            req.body=JSON.parse(req.body.data)
+        if (req.body?.data) {
+            try {
+                req.body = JSON.parse(req.body.data);
+            } catch (e) {
+                return next(new Error("Invalid JSON in 'data' field"));
+            }
         }
+        const parsedResult = zodSchema.safeParse(req.body);
 
         if (!parsedResult.success) {
-            next(parsedResult.error)
+            return next(parsedResult.error);
         }
-
-        //sanitizing the data
         req.body = parsedResult.data;
         next();
     }
