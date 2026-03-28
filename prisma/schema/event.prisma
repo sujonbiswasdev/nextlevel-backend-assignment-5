@@ -8,6 +8,7 @@ model Event {
   image       String
   visibility         EventType @default(PUBLIC)
   status EventStatus @default(UPCOMING)
+  is_featured Boolean? @default(false)
   categories EventCategory
   fee          Float    @default(0)
   organizerId  String

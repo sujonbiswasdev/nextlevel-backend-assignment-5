@@ -47,8 +47,9 @@ const getSingleEvent = catchAsync(async (req: Request, res: Response) => {
 
  const updateEvent = catchAsync(async (req: Request, res: Response) => {
   const eventId = req.params.id;
+  const user=req.user
 
-  const updatedEvent = await EventServices.updateEvent(eventId as string, req.body);
+  const updatedEvent = await EventServices.updateEvent(eventId as string, req.body ,user.email);
 
   sendResponse(res, {
     httpStatusCode: status.OK,

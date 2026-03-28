@@ -13,6 +13,7 @@ export interface ICreateEvent {
 }
 
 export interface IUpdateEventInput {
+  is_featured?:boolean;
   title?: string;
   description?: string;
   date?: string;   

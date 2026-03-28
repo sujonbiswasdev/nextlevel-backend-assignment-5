@@ -174,10 +174,20 @@ const getSingleEvent = async (eventId: string) => {
   };
 };
 
-const updateEvent = async (eventId: string, payload: IUpdateEventInput) => {
+const updateEvent = async (eventId: string, payload: IUpdateEventInput,email:string) => {
   const event = await prisma.event.findUnique({
     where: { id: eventId },
   });
+  const userExist = await prisma.user.findUnique({
+    where: { email: email },
+  });
+  if (!userExist) {
+    throw new AppError(404, "User not found");
+  }
+  
+  if (payload.is_featured && userExist.role!=="ADMIN") {
+    throw new AppError(403, "You are not authorized to feature this event");
+  }
 
   if (!event) {
     throw new AppError(404, "Event not found");
@@ -194,6 +204,8 @@ const updateEvent = async (eventId: string, payload: IUpdateEventInput) => {
       venue: payload.venue,
       status: payload.status,
       categories: payload.categories,
+      is_featured:payload.is_featured
+      
     },
   });
 

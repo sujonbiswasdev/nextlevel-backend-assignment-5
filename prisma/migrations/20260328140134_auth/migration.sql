@@ -99,6 +99,7 @@ CREATE TABLE "Event" (
     "image" TEXT NOT NULL,
     "visibility" "EventType" NOT NULL DEFAULT 'PUBLIC',
     "status" "EventStatus" NOT NULL DEFAULT 'UPCOMING',
+    "is_featured" BOOLEAN DEFAULT false,
     "categories" "EventCategory" NOT NULL,
     "fee" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "organizerId" TEXT NOT NULL,
